@@ -7,9 +7,6 @@ import Code.Files.FileChooser;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -259,7 +256,7 @@ public class Documents extends JPanel {
                 JTextArea filePath = new JTextArea();
                 //filePath.setBorder(new CompoundBorder(new LineBorder(ColorScheme.primaryColor, 2), new EmptyBorder(3,3,3,3)));
                 filePath.setMinimumSize(new Dimension(250,40));
-                filePath.setText(con.isFileDupe(Connection.projectDocumentIDs.get(nameIndex), type));
+                filePath.setText(con.getFile(Connection.projectDocumentIDs.get(nameIndex), type));
                 filePath.setEditable(false);
                 filePath.setFont(Main.font.deriveFont(9f));
 

@@ -2,20 +2,21 @@ package Code.Word;
 
 import Code.Database.Connection;
 import Code.Main.Main;
+import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.impl.xb.xmlschema.SpaceAttribute;
 import org.openxmlformats.schemas.officeDocument.x2006.sharedTypes.STOnOff1;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class GenerateNew {
 
@@ -89,6 +90,9 @@ public class GenerateNew {
 
         //Create Word docs.
         createGeneralInformation(document);
+        createPreface(document, documentID);
+        createActivityDiagram(document);
+        createRequirements(document);
 
         //Write the Document in file system
         FileOutputStream out = new FileOutputStream(filePath + projectName + "." + documentName + ".docx");
@@ -172,7 +176,11 @@ public class GenerateNew {
         tableRow = table.getRow(0);
         tableRow.setHeight(Math.round(twipsPerInch * 0.1f));
         tableRow.getCell(0).setText("Versie:");
-        tableRow.addNewTableCell().setText(Double.toString(con.getDocVersion(documentId)));
+        String version = Double.toString(con.getDocVersion(documentId));
+        if (con.getDocVersion(documentId) < 1.0){
+            version = "1.0";
+        }
+        tableRow.addNewTableCell().setText(version);
 
         tableRow = table.createRow();
         tableRow.setHeight(Math.round(twipsPerInch * 0.1f));
@@ -182,12 +190,20 @@ public class GenerateNew {
         tableRow = table.createRow();
         tableRow.setHeight(Math.round(twipsPerInch * 0.1f));
         tableRow.getCell(0).setText("Groep:");
-        tableRow.getCell(1).setText(con.getProjectGroup());
+        String projectGroep = con.getProjectGroup();
+        if (projectGroep == null){
+            projectGroep = "None";
+        }
+        tableRow.getCell(1).setText(projectGroep);
 
         tableRow = table.createRow();
         tableRow.setHeight(Math.round(twipsPerInch * 0.1f));
         tableRow.getCell(0).setText("Auteurs:");
-        tableRow.getCell(1).setText(con.getProjectGroupMembers(documentId));
+        String authors = con.getProjectGroupMembers(documentId);
+        if (authors == null){
+            authors = "None";
+        }
+        tableRow.getCell(1).setText(authors);
     }
 
     public void createTableOfContents(XWPFDocument document) {
@@ -199,20 +215,6 @@ public class GenerateNew {
         CTSimpleField toc = ctP.addNewFldSimple();
         toc.setInstr("TOC \\h");
         toc.setDirty(STOnOff1.ON);
-    }
-
-    public void createRequirements(XWPFDocument document) {
-        XWPFParagraph p = document.createParagraph();
-        p.setAlignment(ParagraphAlignment.LEFT);
-        p.setStyle("Kop1");
-        p.setPageBreak(true);
-        p.setFontAlignment(2);
-
-        XWPFRun run = p.createRun();
-
-        run.setText("1. Requirements");
-
-
     }
 
     public void createChapter(XWPFDocument document, String title) {
@@ -253,7 +255,13 @@ public class GenerateNew {
         XWPFTable table;
         XWPFTableRow tableRow;
         String authors = Main.con.getProjectGroupMembers(documentID);
-        String[] authorsSeperated = authors.split(",");
+        String[] authorsSeperated;
+        if (authors != null) {
+            authorsSeperated = authors.split(",");
+        }
+        else{
+            authorsSeperated = new String[0];
+        }
 
         createChapter(document, "Algemene Informatie");
 
@@ -288,6 +296,118 @@ public class GenerateNew {
         tableRow.getCell(0).setText("Aan:");
         tableRow.addNewTableCell().setText("Versie:");
         tableRow.addNewTableCell().setText("Datum:");
+
+    }
+
+    public void addText(XWPFDocument document, String text){
+        XWPFParagraph para = document.createParagraph();
+        para.setStyle("Geenafstand");
+        XWPFRun run = para.createRun();
+        run.setText(text);
+    }
+
+    public void createPreface(XWPFDocument document, int documentID){
+
+        createChapter(document, "Inleiding");
+
+        createSubChapter(document, "De casus");
+        addText(document, Main.con.getCasus());
+
+        createSubChapter(document, "Missie en Visie");
+        addText(document, Main.con.getMissionAndVision());
+
+        createSubChapter(document, "Over project");
+        addText(document, Main.con.getAboutProject());
+
+        createSubChapter(document, "Over document");
+        addText(document, Main.con.getAboutDocumentByID(documentID));
+    }
+
+    public void addPicture(XWPFDocument document, String type){
+        String filePath = Main.con.getFile(documentID, type);
+        try {
+
+            FileInputStream fis = new FileInputStream(filePath);
+            BufferedImage bimg = ImageIO.read(fis);
+            int width          = bimg.getWidth();
+            int height         = bimg.getHeight();
+            System.out.println(width);
+
+            FileInputStream is = new FileInputStream(filePath);
+            if (filePath.endsWith("png")) {
+                document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_PNG, "Activity Diagram", Units.toEMU(width), Units.toEMU(height));
+            }
+            else if (filePath.endsWith("jpeg")) {
+                document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_JPEG, "Activity Diagram", Units.toEMU(width), Units.toEMU(height));
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void createActivityDiagram(XWPFDocument document){
+
+        createChapter(document, "Activity Diagram");
+        addPicture(document, "activityDiagram");
+
+    }
+
+    public void createRequirements(XWPFDocument document) {
+
+        createChapter(document, "Requirements");
+        createSubChapter(document, "User Stories en acceptatiecriteria");
+
+        int rows = Main.con.getUseCasesNames().size()+1;
+        int columns = 2;
+
+        ArrayList<String> requirements = Main.con.getAllRequirements();
+        ArrayList<String> usecases = Main.con.getUseCasesNames();
+
+        XWPFTable table = document.createTable(rows ,columns);
+        table.setWidth("100%");
+
+        table.getRow(0).getCell(0).setText("Nr");
+        table.getRow(0).getCell(1).setText("Beschrijving");
+
+        for (String usecase : usecases){
+
+            int r = usecases.indexOf(usecase) + 1;
+            table.getRow(r).getCell(0).setText("US" + r);
+
+            XWPFTableCell cellPar = table.getRow(r).getCell(1);
+            XWPFParagraph para = cellPar.addParagraph();
+            para.setStyle("Geenafstand");
+            XWPFRun run = para.createRun();
+            run.setText(usecases.get(r-1));
+            run.setBold(true);
+
+            para = cellPar.addParagraph();
+            para.setStyle("Geenafstand");
+            run = para.createRun();
+            String requirement = "";
+            if (r-1 < requirements.size()) {
+                requirement = requirements.get(r-1);
+            }
+            run.setText(requirement);
+
+            para = cellPar.addParagraph();
+            para.setStyle("Geenafstand");
+            run = para.createRun();
+
+            para = cellPar.addParagraph();
+            para.setStyle("Geenafstand");
+            run = para.createRun();
+            run.setBold(true);
+            run.setText("Acceptatiecriteria:");
+
+            for (String crit : Main.con.getUseCaseCriteria(usecases.get(r-1))){
+                para = cellPar.addParagraph();
+                para.setStyle("Geenafstand");
+                run = para.createRun();
+                run.setText("  -  " + crit);
+            }
+        }
 
     }
 }

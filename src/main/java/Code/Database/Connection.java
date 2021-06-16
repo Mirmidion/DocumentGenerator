@@ -1,6 +1,7 @@
 package Code.Database;
 
 import Code.Main.Main;
+import com.mysql.cj.protocol.Resultset;
 
 import javax.xml.transform.Result;
 import java.io.File;
@@ -104,8 +105,9 @@ public class Connection {
             int size = 0;
 
             ResultSet rs = select("SELECT projectID FROM projects ORDER BY projectID DESC");
-            rs.next();
-            size = rs.getInt(1);
+            if (rs.next()) {
+                size = rs.getInt(1);
+            }
 
             rs = select("SELECT name, projectID FROM projects");
             while (rs.next()) {
@@ -197,11 +199,11 @@ public class Connection {
 
 
         try {
-
+            int size = 0;
             ResultSet rs = select("SELECT documentID FROM documents ORDER BY documentID DESC");
-            rs.next();
-            int size = rs.getInt(1);
-
+            if (rs.next()) {
+                 size = rs.getInt(1);
+            }
             rs = select("SELECT name, documentID FROM documents");
 
             while (rs.next()) {
@@ -334,7 +336,7 @@ public class Connection {
         }
     }
 
-    public String isFileDupe(int documentID, String type){
+    public String getFile(int documentID, String type){
         try{
             ResultSet rs = select("SELECT type, filePath FROM documentfile WHERE documentID =" + documentID);
             while (rs.next()){
@@ -475,6 +477,25 @@ public class Connection {
         return beschrijving;
     }
 
+    public ArrayList<String> getAllRequirements(){
+        ArrayList<String> beschrijving = new ArrayList<>();
+        try{
+
+            ResultSet rs = select("SELECT requirement FROM usecaserequirement WHERE usecaseID IN (" +
+                    "SELECT usecaseID " +
+                    "FROM usecases " +
+                    "WHERE projectID = " + Main.currentProjectID + ")");
+            if (rs.next()){
+                beschrijving.add(rs.getString(1));
+            }
+            rs.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return beschrijving;
+    }
+
     public void addUseCaseRequirement(String requirement, String usecaseName){
         int useCaseID = getUseCaseIDByName(usecaseName);
         int size = 0;
@@ -588,9 +609,23 @@ public class Connection {
         }
     }
 
-    public String getAbout(int nameIndex){
+    public String getAboutDocumentByIndex(int nameIndex){
         String about = "";
         int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        try{
+            ResultSet rs = select("SELECT content FROM aboutdocument WHERE documentID = " + documentID);
+            if (rs.next()){
+                about = rs.getString(1);
+            }
+            rs.close();
+        }
+        catch (Exception e){
+
+        }
+        return about;
+    }
+    public String getAboutDocumentByID(int documentID){
+        String about = "";
         try{
             ResultSet rs = select("SELECT content FROM aboutdocument WHERE documentID = " + documentID);
             if (rs.next()){
@@ -629,5 +664,50 @@ public class Connection {
         catch (Exception e){
 
         }
+    }
+
+    public String getCasus(){
+        ResultSet rs;
+        String casus = "";
+        try{
+            rs = select("SELECT casus FROM projects WHERE projectID = " + Main.currentProjectID);
+            if (rs.next()){
+                casus = rs.getString(1);
+            }
+        }
+        catch (Exception e){
+
+        }
+        return casus;
+    }
+
+    public String getMissionAndVision(){
+        ResultSet rs;
+        String casus = "";
+        try{
+            rs = select("SELECT missie FROM projects WHERE projectID = " + Main.currentProjectID);
+            if (rs.next()){
+                casus = rs.getString(1);
+            }
+        }
+        catch (Exception e){
+
+        }
+        return casus;
+    }
+
+    public String getAboutProject(){
+        ResultSet rs;
+        String casus = "";
+        try{
+            rs = select("SELECT about FROM projects WHERE projectID = " + Main.currentProjectID);
+            if (rs.next()){
+                casus = rs.getString(1);
+            }
+        }
+        catch (Exception e){
+
+        }
+        return casus;
     }
 }

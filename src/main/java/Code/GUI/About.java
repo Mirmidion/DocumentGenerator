@@ -20,7 +20,7 @@ public class About extends JDialog {
         add(aboutLabel,"wrap");
 
         JTextArea aboutText = new JTextArea();
-        aboutText.setText(Main.con.getAbout(nameIndex));
+        aboutText.setText(Main.con.getAboutDocumentByIndex(nameIndex));
         aboutText.setFont(Main.font.deriveFont(10f));
         aboutText.setForeground(ColorScheme.detailColor);
         aboutText.setMinimumSize(new Dimension(250,125));
