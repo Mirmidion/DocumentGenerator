@@ -1,0 +1,140 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema designs
+-- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `designs` ;
+
+-- -----------------------------------------------------
+-- Schema designs
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `designs` DEFAULT CHARACTER SET utf8mb4 ;
+USE `designs` ;
+
+-- -----------------------------------------------------
+-- Table `designs`.`aboutdocument`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `designs`.`aboutdocument` (
+  `aboutID` INT(11) NOT NULL,
+  `content` VARCHAR(999) NOT NULL,
+  `documentID` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`aboutID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `designs`.`documentfile`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `designs`.`documentfile` (
+  `documentID` INT(11) NOT NULL,
+  `type` VARCHAR(45) NOT NULL,
+  `filePath` VARCHAR(100) NOT NULL,
+  `fileID` INT(10) NOT NULL,
+  PRIMARY KEY (`fileID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `designs`.`documentproperty`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `designs`.`documentproperty` (
+  `documentID` INT(11) NOT NULL,
+  `propertyType` VARCHAR(45) NOT NULL,
+  `row` VARCHAR(45) NOT NULL,
+  `rowContent` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`documentID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `designs`.`documents`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `designs`.`documents` (
+  `name` VARCHAR(255) NOT NULL,
+  `projectID` INT(10) NOT NULL,
+  `documentID` INT(10) NOT NULL,
+  `type` INT(10) NOT NULL,
+  `version` DOUBLE NULL DEFAULT NULL,
+  `authors` VARCHAR(45) NULL DEFAULT NULL)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `designs`.`projects`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `designs`.`projects` (
+  `name` VARCHAR(45) NOT NULL,
+  `projectID` INT(10) NOT NULL,
+  `projectGroup` VARCHAR(45) NULL DEFAULT NULL,
+  `casus` VARCHAR(999) NULL DEFAULT NULL,
+  `missie` VARCHAR(999) NULL DEFAULT NULL,
+  `about` VARCHAR(999) NULL DEFAULT NULL,
+  PRIMARY KEY (`name`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `designs`.`usecasecriteria`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `designs`.`usecasecriteria` (
+  `criteriaID` INT(10) NOT NULL,
+  `criteria` VARCHAR(45) NOT NULL,
+  `usecaseID` INT(10) NOT NULL,
+  PRIMARY KEY (`criteriaID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `designs`.`usecaserequirement`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `designs`.`usecaserequirement` (
+  `usecaseID` INT(10) NOT NULL,
+  `requirement` VARCHAR(255) NOT NULL,
+  `requirementID` INT(10) NOT NULL,
+  PRIMARY KEY (`requirementID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `designs`.`usecases`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `designs`.`usecases` (
+  `usecaseID` INT(11) NOT NULL,
+  `projectID` VARCHAR(45) NOT NULL,
+  `usecaseName` VARCHAR(45) NOT NULL,
+  `orderID` INT(10) NOT NULL,
+  PRIMARY KEY (`usecaseID`, `usecaseName`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+-- -----------------------------------------------------
+-- Table `designs`.`wireframes`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `designs`.`wireframes` (
+  `documentID` INT(10) NOT NULL,
+  `title` VARCHAR(45) NOT NULL,
+  `filePath` VARCHAR(100) NOT NULL,
+  `fileID` INT(10) NOT NULL,
+  PRIMARY KEY (`fileID`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

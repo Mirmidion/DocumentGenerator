@@ -15,18 +15,7 @@ import java.util.ArrayList;
 public class Connection {
     /*
 
-    CREATE DATABASE designs;
-    USE designs;
-    CREATE TABLE `designs`.`fo` (
-            `name` VARCHAR(255) NOT NULL,
-	        `project` VARCHAR(255) NOT NULL,
-            `ID` INT(10) NOT NULL);
 
-    CREATE USER 'app'@'%' IDENTIFIED BY 'admin';
-    GRANT INSERT ON * TO 'app'@'%';
-    GRANT SELECT ON * TO 'app'@'%';
-    GRANT UPDATE ON * TO 'app'@'%';
-    GRANT DELETE ON * TO 'app'@'%';
 
     Table documentproperty.type:
         FO
