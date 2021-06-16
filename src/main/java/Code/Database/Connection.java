@@ -316,12 +316,34 @@ public class Connection {
             rs = select("SELECT type FROM documentfile WHERE documentID = " + documentID);
             while (rs.next()){
                 if (rs.getString(1).equals(type)){
-                    return false;
+                    return updateFile(path, documentID, type);
                 }
             }
 
             connection = DriverManager.getConnection(url, username, password);
             String query = "INSERT INTO documentfile VALUES(" + documentID + ",\"" + type + "\", ?," + (size+1) + ")";
+
+            statement = connection.prepareStatement(query);
+            statement.setString(1, path);
+            statement.executeUpdate();
+            statement.close();
+            connection.close();
+            return true;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateFile(String path, int documentID, String type){
+
+        java.sql.Connection connection;
+        PreparedStatement statement;
+        try{
+
+            connection = DriverManager.getConnection(url, username, password);
+            String query = "UPDATE documentfile SET filePath = ? WHERE documentID = " + documentID + " AND type = '" + type + "'";
 
             statement = connection.prepareStatement(query);
             statement.setString(1, path);
