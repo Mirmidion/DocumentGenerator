@@ -19,8 +19,6 @@ public class FileChooser {
     public String getPath(){
         String path = "";
         fileChooser = new CustomFileChooser();
-//        changeColor(fileChooser.getComponents());
-//        setFileChooserColors(fileChooser, ColorScheme.primaryColor, ColorScheme.detailColor);
         returnFile = fileChooser.showDialog(Main.instance, "Choose");
 
         if (returnFile == JFileChooser.APPROVE_OPTION){

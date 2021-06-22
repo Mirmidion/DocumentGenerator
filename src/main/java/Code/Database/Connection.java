@@ -935,4 +935,68 @@ public class Connection {
             addBeschrijving(usecaseName, beschrijving);
         }
     }
+
+    public ArrayList<String> getWireframes(int nameIndex){
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        ArrayList<String> names = new ArrayList<>();
+        try{
+            ResultSet rs = select("SELECT title FROM wireframes WHERE documentID = " + documentID);
+            while(rs.next()){
+                names.add(rs.getString(1));
+            }
+        }
+        catch(Exception e){
+         e.printStackTrace();
+        }
+        return names;
+    }
+
+    public void addWireframe(int nameIndex, String title){
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        try{
+            update("INSERT INTO wireframes (documentID,title) VALUES(" + documentID + "," + title + ")");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void updateWireframeFilePath(int nameIndex, String filePath){
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        try{
+            PreparedStatement statement;
+            java.sql.Connection connection = DriverManager.getConnection(url, username, password);
+            String query = "UPDATE wireframes SET filePath = ?";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, filePath);
+            statement.executeUpdate();
+            statement.close();
+            connection.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void updateWireframeName(int nameIndex, String name){
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        try{
+            ResultSet rs = select("SELECT title FROM wireframes WHERE documentID = " + documentID);
+            while(rs.next()){
+                if (rs.getString(1).equals(name)){
+                    return;
+                }
+            }
+            update("UPDATE wireframes SET title = '" + name + "'");
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public void removeWireframe(int nameIndex, String title){
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        update("DELETE FROM wireframes WHERE documentID = " + documentID + " AND title = '" + title + "'");
+    }
 }

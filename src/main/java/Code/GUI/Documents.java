@@ -110,6 +110,12 @@ public class Documents extends JPanel {
                     allButtons.add(domeinModel);
 
                     JButton wireFrames = new JButton("Wireframes");
+                    wireFrames.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            Wireframes wireframes = new Wireframes(nameIndex);
+                        }
+                    });
                     allButtons.add(wireFrames);
 
                     JButton designKeuzes = new JButton("Designkeuzes");
