@@ -7,10 +7,7 @@ import javax.xml.transform.Result;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class Connection {
@@ -77,7 +74,7 @@ public class Connection {
             }
 
             projectNames = names;
-            this.projectIDs = projectIDs;
+            Connection.projectIDs = projectIDs;
             rs.close();
 
         } catch (Exception e) {
@@ -102,14 +99,11 @@ public class Connection {
 
 
         try {
-            int size = 0;
 
-            ResultSet rs = select("SELECT projectID FROM projects ORDER BY projectID DESC");
-            if (rs.next()) {
-                size = rs.getInt(1);
-            }
 
-            rs = select("SELECT name, projectID FROM projects");
+
+
+            ResultSet rs = select("SELECT name, projectID FROM projects");
             while (rs.next()) {
                 projectNameList.add(rs.getString(1));
                 projectIDList.add(rs.getInt(2));
@@ -118,7 +112,7 @@ public class Connection {
                 }
             }
 
-            update("INSERT INTO projects (name, projectID) VALUES(\"" + name1 + "\", " + (size + 1) + ")");
+            update("INSERT INTO projects (name) VALUES('" + name1 + "')");
             rs.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -199,12 +193,9 @@ public class Connection {
 
 
         try {
-            int size = 0;
-            ResultSet rs = select("SELECT documentID FROM documents ORDER BY documentID DESC");
-            if (rs.next()) {
-                 size = rs.getInt(1);
-            }
-            rs = select("SELECT name, documentID FROM documents");
+
+
+            ResultSet rs = select("SELECT name, documentID FROM documents");
 
             while (rs.next()) {
                 projectDocumentNames.add(rs.getString(1));
@@ -214,7 +205,7 @@ public class Connection {
                 }
             }
 
-            update("INSERT INTO documents (name, projectID, documentID, type) VALUES(\'" + name1 + "\', " + Main.currentProjectID + "," + (size + 1) + ", " + type1 + ")");
+            update("INSERT INTO documents (name, projectID, type) VALUES(\'" + name1 + "\', " + Main.currentProjectID + ", " + type1 + ")");
             rs.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -303,17 +294,14 @@ public class Connection {
     }
 
     public boolean addFile(String path, int documentID, String type){
-        int size = 1;
+
         java.sql.Connection connection;
         PreparedStatement statement;
         try{
-            ResultSet rs = select("SELECT fileID FROM documentfile ORDER BY fileID DESC");
-            if (rs.next()){
-                size = rs.getInt(1);
-            }
+
             System.out.println(path);
 
-            rs = select("SELECT type FROM documentfile WHERE documentID = " + documentID);
+            ResultSet rs = select("SELECT type FROM documentfile WHERE documentID = " + documentID);
             while (rs.next()){
                 if (rs.getString(1).equals(type)){
                     return updateFile(path, documentID, type);
@@ -321,7 +309,7 @@ public class Connection {
             }
 
             connection = DriverManager.getConnection(url, username, password);
-            String query = "INSERT INTO documentfile VALUES(" + documentID + ",\"" + type + "\", ?," + (size+1) + ")";
+            String query = "INSERT INTO documentfile (documentID, type, filePath) VALUES(" + documentID + ",\"" + type + "\", ?)";
 
             statement = connection.prepareStatement(query);
             statement.setString(1, path);
@@ -397,7 +385,7 @@ public class Connection {
                 usecaseID += rs.getInt(1);
             }
 
-            update("INSERT INTO usecases VALUES(" + usecaseID + "," + Main.currentProjectID + ", '" + name + "', " + usecaseID + ")");
+            update("INSERT INTO usecases (projectID, usecaseName, orderID) VALUES(" + Main.currentProjectID + ", '" + name + "', " + usecaseID + ")");
             rs.close();
         }
         catch (Exception e){
@@ -520,16 +508,9 @@ public class Connection {
 
     public void addUseCaseRequirement(String requirement, String usecaseName){
         int useCaseID = getUseCaseIDByName(usecaseName);
-        int size = 0;
 
         try{
-            ResultSet rs = select("SELECT requirementID FROM usecaserequirement ORDER BY requirementID DESC");
-            if (rs.next()) {
-                size = rs.getInt(1);
-            }
-
-            update("INSERT INTO usecaserequirement VALUES(" + useCaseID + ",'" + requirement + "'," + (size+1) + ")");
-            rs.close();
+            update("INSERT INTO usecaserequirement (usecaseID, requirement) VALUES(" + useCaseID + ",'" + requirement + "')");
         }
         catch (Exception e){
             e.printStackTrace();
@@ -558,15 +539,25 @@ public class Connection {
     public void updateUseCaseCriteria(ArrayList<String> criteria, String usecaseName){
         int useCaseID = getUseCaseIDByName(usecaseName);
         int size = 0;
+        ResultSet rs = select("");
         try{
+            rs = select("SELECT * FROM usecasecriteria WHERE useCaseID = " + useCaseID);
             update("DELETE FROM usecasecriteria WHERE useCaseID = " + useCaseID);
         }
         catch (Exception e){
+            try {
+                while (rs.next()) {
+                    update("INSERT INTO usecasecriteria VALUES(" + rs.getInt(1) + ",'" + rs.getString(2) + "'," + rs.getInt(3) + ")");
+                }
+            }
+            catch(Exception ex){
+                    ex.printStackTrace();
+            }
             e.printStackTrace();
         }
         for (String crit : criteria){
             try{
-                ResultSet rs = select("SELECT criteriaID FROM usecasecriteria ORDER BY criteriaID DESC");
+                rs = select("SELECT criteriaID FROM usecasecriteria ORDER BY criteriaID DESC");
                 if (rs.next()) {
                     size = rs.getInt(1);
                 }
@@ -597,19 +588,47 @@ public class Connection {
     }
 
     public void addAbout(int nameIndex, String contents){
-        int size = 0;
         int documentID = Connection.projectDocumentIDs.get(nameIndex);
         try{
-            ResultSet rs = select("SELECT aboutID FROM aboutdocument ORDER BY aboutID DESC");
-            if (rs.next()) {
-                size = rs.getInt(1);
-            }
-            update("INSERT INTO aboutdocument VALUES(" + size + ", '" + contents + "', " + documentID + ")");
-            rs.close();
+
+            update("INSERT INTO aboutdocument (content, documentID) VALUES('" + contents + "', " + documentID + ")");
+
         }
         catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void updateActors(int nameIndex, ArrayList<String> actors, ArrayList<Boolean> isPrimary){
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        update("DELETE FROM actors WHERE documentID = " + documentID);
+        for (int i = 0; i < actors.size(); i++) {
+            update("INSERT INTO actors (actor, documentID, isprimary) VALUES('" + actors.get(i) + "'," + documentID + "," + isPrimary.get(i) + ")");
+        }
+    }
+
+    public ArrayList<String[]> getActors(int nameIndex){
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        ArrayList<String[]> actors = new ArrayList<>();
+        try{
+            ResultSet rs = select("SELECT actor, isprimary FROM actors WHERE documentID = " + documentID);
+            while(rs.next()){
+                String[] actor = new String[2];
+                actor[0] = rs.getString(1);
+                boolean primary = rs.getBoolean(2);
+                if (primary){
+                    actor[1] = "true";
+                }
+                else{
+                    actor[1] = "false";
+                }
+                actors.add(actor);
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return actors;
     }
 
     public void updateAbout(int nameIndex, String contents){
@@ -731,5 +750,189 @@ public class Connection {
 
         }
         return casus;
+    }
+
+    public void addActorsUsedInUseCase(ArrayList<String> actors, String usecaseName, int nameIndex){
+        int usecaseID = getUseCaseIDByName(usecaseName);
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        try{
+            ResultSet rs;
+            update("DELETE FROM usecaseactors WHERE usecaseID = " + usecaseID);
+            ArrayList<Integer> actorIDs = new ArrayList<>();
+            for (String actor : actors) {
+                rs = select("SELECT actorID FROM actors WHERE actor = '" + actor + "' AND documentID = " + documentID);
+                if (rs.next()) {
+                    actorIDs.add(rs.getInt(1));
+                }
+            }
+            for (Integer id : actorIDs){
+                update("INSERT INTO usecaseactors VALUES(" + id + "," + usecaseID + ")");
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<String[]> actorUsedInUseCase(String usecaseName, int nameIndex){
+        int usecaseID = getUseCaseIDByName(usecaseName);
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        ArrayList<String[]> addedList = new ArrayList<>();
+        try{
+            ResultSet rs = select("SELECT actorID FROM usecaseactors WHERE usecaseID = " + usecaseID);
+            ArrayList<Integer> actorIDsAdded = new ArrayList<>();
+            while (rs.next()){
+                actorIDsAdded.add(rs.getInt(1));
+            }
+
+            rs = select("SELECT actorID, actor FROM actors WHERE documentID = " + documentID);
+
+            while (rs.next()){
+                String[] actorAdded = new String[2];
+                actorAdded[0] = rs.getString(2);
+                if (actorIDsAdded.contains(rs.getInt(1))){
+                    actorAdded[1] = "true";
+                }
+                else{
+                    actorAdded[1] = "false";
+                }
+                addedList.add(actorAdded);
+            }
+            rs.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return addedList;
+    }
+
+    public ArrayList<String> getBeschrijvingScenario(String usecaseName){
+        int usecaseID = getUseCaseIDByName(usecaseName);
+        ArrayList<String> scenario = new ArrayList<>();
+        try{
+            ResultSet rs = select("SELECT row FROM beschrijvingscenario WHERE usecaseID = " + usecaseID + " ORDER BY orderID ASC");
+            while (rs.next()){
+                scenario.add(rs.getString(1));
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return scenario;
+    }
+
+    public void addScenarioRow(String usecaseName){
+        int usecaseID = getUseCaseIDByName(usecaseName);
+        update("INSERT INTO beschrijvingscenario(usecaseID, row) VALUES(" + usecaseID + ", 'Edit This' )");
+        try{
+            ResultSet rs = select("SELECT scenarioID FROM beschrijvingscenario ORDER BY scenarioID DESC");
+            if (rs.next()){
+                update("UPDATE beschrijvingscenario SET orderID = " + rs.getInt(1) + " WHERE scenarioID = " + rs.getInt(1));
+                update("UPDATE beschrijvingscenario SET row = 'Edit This" + rs.getInt(1) + "' WHERE scenarioID = " + rs.getInt(1));
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void moveScenarioRow(int row, int direction, String usecaseName){
+        ArrayList<String> names = getBeschrijvingScenario(usecaseName);
+        int usecaseID = getUseCaseIDByName(usecaseName);
+        int goalID = -1;
+        String currentName;
+        int currentID = -1;
+        String goal;
+
+        try {
+            currentName = names.get(row);
+            goal = names.get(row + direction);
+        }
+        catch (IndexOutOfBoundsException e){
+            return;
+        }
+
+        try{
+            ResultSet rs = select("SELECT orderID FROM beschrijvingscenario WHERE row = '" + currentName + "' AND usecaseID = " + usecaseID);
+            if (rs.next()){
+                currentID = rs.getInt(1);
+            }
+            rs = select("SELECT orderID FROM beschrijvingscenario WHERE row = '" + goal + "' AND usecaseID = " + usecaseID);
+            if (rs.next()){
+                goalID = rs.getInt(1);
+            }
+            if (goalID != -1 && currentID != -1) {
+                update("UPDATE beschrijvingscenario SET orderID = " + goalID + " WHERE row = '" + currentName + "'");
+                update("UPDATE beschrijvingscenario SET orderID = " + currentID + " WHERE row = '" + goal + "'");
+            }
+            rs.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void updateScenarioRows(ArrayList<String> rows, int usecaseID){
+        for (String row : rows){
+            for (String secondRow : rows){
+                if (row.equals(secondRow) && rows.indexOf(secondRow) != rows.indexOf(row)){
+                    return;
+                }
+            }
+        }
+        int counter = 0;
+        try{
+            ResultSet rowIDs = select("SELECT scenarioID FROM beschrijvingscenario WHERE usecaseID = " + usecaseID + " ORDER BY orderID ASC");
+            while(rowIDs.next()){
+                update("UPDATE beschrijvingscenario SET row = '" + rows.get(counter) + "' WHERE scenarioID = " + rowIDs.getInt(1));
+                counter++;
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public String[] getBeschrijving(String usecaseName){
+        int usecaseID = getUseCaseIDByName(usecaseName);
+        String[] beschrijving = new String[3];
+        try{
+            ResultSet rs = select("SELECT precondition, postcondition, uitzondering from usecasebeschrijving WHERE usecaseID = " + usecaseID);
+            if(rs.next()){
+                beschrijving[0] = rs.getString(1);
+                beschrijving[1] = rs.getString(2);
+                beschrijving[2] = rs.getString(3);
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return beschrijving;
+    }
+
+    private void addBeschrijving(String usecaseName, String[] beschrijving){
+        int usecaseID = getUseCaseIDByName(usecaseName);
+        try{
+            update("INSERT INTO usecasebeschrijving (usecaseID,precondition,postcondition,uitzondering) VALUES(" + usecaseID + ",'" + beschrijving[0] + "','" + beschrijving[1] + "','" + beschrijving[2] + "')");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void updateBeschrijving(String usecaseName, String[] beschrijving){
+        int usecaseID = getUseCaseIDByName(usecaseName);
+        try{
+            ResultSet rs = select("SELECT precondition FROM usecasebeschrijving WHERE usecaseID = " + usecaseID);
+            if (!rs.next()){
+                addBeschrijving(usecaseName, beschrijving);
+            }
+            update("UPDATE usecasebeschrijving SET precondition = '" + beschrijving[0] + "', postcondition = '" + beschrijving[1] + "', uitzondering = '" + beschrijving[2] + "' WHERE usecaseID = " + usecaseID);
+        }
+        catch (Exception e){
+            addBeschrijving(usecaseName, beschrijving);
+        }
     }
 }

@@ -100,7 +100,7 @@ public class Documents extends JPanel {
                     useCaseInfo.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            Beschrijvingen besch = new Beschrijvingen();
+                            Beschrijvingen besch = new Beschrijvingen(nameIndex);
                         }
                     });
                     allButtons.add(useCaseInfo);
