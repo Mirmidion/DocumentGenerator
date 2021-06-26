@@ -774,6 +774,26 @@ public class Connection {
         }
     }
 
+    public String getActorsUsedInUseCase(int usecaseID){
+        StringBuilder actors = new StringBuilder();
+
+        try{
+            ResultSet rs = select("SELECT actor FROM actors WHERE actorID IN (SELECT actorID FROM usecaseactors WHERE usecaseID = " + usecaseID + ")");
+            while(rs.next()){
+                actors.append(rs.getString(1));
+                if (!rs.isLast()){
+                    actors.append(", ");
+                }
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+
+        return actors.toString();
+    }
+
     public ArrayList<String[]> actorUsedInUseCase(String usecaseName, int nameIndex){
         int usecaseID = getUseCaseIDByName(usecaseName);
         int documentID = Connection.projectDocumentIDs.get(nameIndex);
@@ -809,6 +829,20 @@ public class Connection {
 
     public ArrayList<String> getBeschrijvingScenario(String usecaseName){
         int usecaseID = getUseCaseIDByName(usecaseName);
+        ArrayList<String> scenario = new ArrayList<>();
+        try{
+            ResultSet rs = select("SELECT row FROM beschrijvingscenario WHERE usecaseID = " + usecaseID + " ORDER BY orderID ASC");
+            while (rs.next()){
+                scenario.add(rs.getString(1));
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return scenario;
+    }
+
+    public ArrayList<String> getBeschrijvingScenario(int usecaseID){
         ArrayList<String> scenario = new ArrayList<>();
         try{
             ResultSet rs = select("SELECT row FROM beschrijvingscenario WHERE usecaseID = " + usecaseID + " ORDER BY orderID ASC");
@@ -898,6 +932,24 @@ public class Connection {
 
     public String[] getBeschrijving(String usecaseName){
         int usecaseID = getUseCaseIDByName(usecaseName);
+        String[] beschrijving = new String[3];
+        try{
+            ResultSet rs = select("SELECT precondition, postcondition, uitzondering from usecasebeschrijving WHERE usecaseID = " + usecaseID);
+            if(rs.next()){
+                beschrijving[0] = rs.getString(1);
+                beschrijving[1] = rs.getString(2);
+                beschrijving[2] = rs.getString(3);
+            }
+            rs.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return beschrijving;
+    }
+
+    public String[] getBeschrijving(int usecaseID){
         String[] beschrijving = new String[3];
         try{
             ResultSet rs = select("SELECT precondition, postcondition, uitzondering from usecasebeschrijving WHERE usecaseID = " + usecaseID);

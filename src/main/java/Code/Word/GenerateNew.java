@@ -93,6 +93,7 @@ public class GenerateNew {
         createPreface(document, documentID);
         createActivityDiagram(document);
         createRequirements(document);
+        createUseCases(document);
         createDomainModel(document);
         createWireframes(document, documentID);
 
@@ -379,17 +380,18 @@ public class GenerateNew {
         }
     }
 
-    public void addPNGPicture(XWPFDocument document, FileInputStream filePath){
-
+    public void addPNGPicture(XWPFDocument document){
+        String filePath = "C:\\Users\\yorbe\\Desktop\\DocumentGenerator\\src\\main\\java\\Templates\\img.png";
+        System.out.println(filePath.toString());
         try {
 
-            FileInputStream fis = filePath;
+            FileInputStream fis = new FileInputStream(filePath);
             BufferedImage bimg = ImageIO.read(fis);
-            int width          = bimg.getWidth();
-            int height         = bimg.getHeight();
+            int width          = Math.round(bimg.getWidth() * 0.7f);
+            int height         = Math.round(bimg.getHeight() * 0.7f);
             System.out.println(width);
 
-            FileInputStream is = filePath;
+            FileInputStream is = new FileInputStream(filePath);
             document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_PNG, "", Units.toEMU(width), Units.toEMU(height));
 
         }
@@ -463,17 +465,62 @@ public class GenerateNew {
 
     }
 
+    public void createUseCases(XWPFDocument document){
+        createChapter(document,"Use Cases");
+        createUseCaseDiagram(document);
+        createUseCaseBeschrijvingen(document);
+    }
+
+    public void createUseCaseDiagram(XWPFDocument document){
+
+        createSubChapter(document, "Use Case Diagram");
+        addPicture(document,"useCaseDiagram");
+    }
+
+    public void createUseCaseBeschrijvingen(XWPFDocument document){
+        createSubChapter(document, "Use Case Beschrijvingen");
+        for (String name : Main.con.getUseCasesNames()){
+            int usecaseID = Main.con.getUseCaseIDByName(name);
+            XWPFTable table = document.createTable(6 ,2);
+            table.setWidth("100%");
+
+            table.getRow(0).getCell(0).setText("Naam");
+            table.getRow(0).getCell(1).setText(name);
+
+            table.getRow(1).getCell(0).setText("Actoren");
+            table.getRow(1).getCell(1).setText(Main.con.getActorsUsedInUseCase(usecaseID));
+
+            String[] properties = Main.con.getBeschrijving(usecaseID);
+
+            table.getRow(2).getCell(0).setText("Preconditie(s)");
+            table.getRow(2).getCell(1).setText(properties[0]);
+
+            table.getRow(3).getCell(0).setText("Postconditie(s)");
+            table.getRow(3).getCell(1).setText(properties[1]);
+
+            table.getRow(4).getCell(0).setText("Hoofdscenario");
+            int counter = 1;
+            for (String row : Main.con.getBeschrijvingScenario(usecaseID)){
+                XWPFRun run = table.getRow(4).getCell(1).addParagraph().createRun();
+                run.setText(counter + " " + row);
+            }
+
+            table.getRow(5).getCell(0).setText("Uitzonderingen");
+            table.getRow(5).getCell(1).setText(properties[2]);
+        }
+    }
+
     public void createDomainModelExplanation(XWPFDocument document){
         addText(document, "Een domeinmodel is een model wat objecten, eigenschappen en de onderlinge relaties tussen elkaar weergeeft binnen de applicaties. Het bestaat uit klassen, attributen, associaties en overervingen. ");
         createSpacing(1,document);
         createSubChapter(document, "Legenda");
         FileInputStream fis;
         try {
-            fis = new FileInputStream("src/main/java/Templates/img.png");
-            addPNGPicture(document, fis);
+
+            addPNGPicture(document);
         }
         catch (Exception e){
-
+            e.printStackTrace();
         }
 
 
