@@ -21,13 +21,8 @@ class Beschrijvingen extends JDialog{
 
     public Beschrijvingen(int nameIndex){
 
-
-
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setBackground(ColorScheme.firstBackgroundColor);
-        setLayout(new MigLayout("align 50% 50%"));
+        ObjectDecorator.decorateJDialog(this);
         setMinimumSize(new Dimension(500,700));
-        setFont(Main.font.deriveFont(10f));
 
 
         useCases = new JTabbedPane(JTabbedPane.LEFT);
@@ -45,7 +40,7 @@ class Beschrijvingen extends JDialog{
             properties.setLayout(new MigLayout("align 50% 50%"));
 
             JLabel actorLabel = new JLabel("Actors:");
-            actorLabel.setFont(Main.font.deriveFont(FONT_SIZE));
+            ObjectDecorator.decorateNormalLabel(actorLabel);
             properties.add(actorLabel,"wrap, align 50% 50%");
 
             JPanel actorPanel = new JPanel();
@@ -72,7 +67,7 @@ class Beschrijvingen extends JDialog{
             String[] beschrijving = Main.con.getBeschrijving(name);
 
             JLabel preLabel = new JLabel("Preconditie:");
-            preLabel.setFont(Main.font.deriveFont(FONT_SIZE));
+            ObjectDecorator.decorateNormalLabel(preLabel);
             properties.add(preLabel,"wrap, align 50% 50%");
 
             JTextArea preconditie = new JTextArea();
@@ -89,7 +84,7 @@ class Beschrijvingen extends JDialog{
             properties.add(prePane, "wrap, align 50% 50%");
 
             JLabel postLabel = new JLabel("Postconditie:");
-            postLabel.setFont(Main.font.deriveFont(FONT_SIZE));
+            ObjectDecorator.decorateNormalLabel(postLabel);
             properties.add(postLabel,"wrap, align 50% 50%");
 
             JTextArea postconditie = new JTextArea();
@@ -106,7 +101,7 @@ class Beschrijvingen extends JDialog{
             properties.add(postPane, "wrap, align 50% 50%");
 
             JLabel scenarioLabel = new JLabel("Hoofdscenario:");
-            scenarioLabel.setFont(Main.font.deriveFont(FONT_SIZE));
+            ObjectDecorator.decorateNormalLabel(scenarioLabel);
             properties.add(scenarioLabel,"wrap, align 50% 50%");
 
             JPanel scenario = new JPanel();
@@ -131,12 +126,11 @@ class Beschrijvingen extends JDialog{
                     revalidate();
                 }
             });
-            addButton.setFont(Main.font.deriveFont(FONT_SIZE));
-            addButton.setMinimumSize(new Dimension(SMALL_BUTTON_WIDTH,SMALL_BUTTON_HEIGHT));
+            ObjectDecorator.decorateSmallButton(addButton);
             properties.add(addButton, "span, wrap, align 100%");
 
             JLabel uitzonderingLabel = new JLabel("Uitzondering:");
-            uitzonderingLabel.setFont(Main.font.deriveFont(FONT_SIZE));
+            ObjectDecorator.decorateNormalLabel(uitzonderingLabel);
             properties.add(uitzonderingLabel,"wrap, align 50% 50%");
 
             JTextArea exception = new JTextArea();
@@ -178,11 +172,10 @@ class Beschrijvingen extends JDialog{
                     Main.con.updateScenarioRows(rows, Main.con.getUseCaseIDByName(name));
                 }
             });
-            saveButton.setFont(Main.font.deriveFont(FONT_SIZE));
-            saveButton.setMinimumSize(new Dimension(BUTTON_WIDTH,BUTTON_HEIGHT));
+            ObjectDecorator.decorateMediumButton(saveButton);
             properties.add(saveButton, "span, wrap, align 50% 50%");
 
-            useCases.addTab("US" + counter + " " + name, properties);
+            useCases.addTab("US" + (tableCounter+1) + " " + name, properties);
             counter++;
             tableCounter++;
         }

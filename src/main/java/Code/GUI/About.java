@@ -12,20 +12,16 @@ import java.util.ArrayList;
 
 public class About extends JDialog {
     public About(int nameIndex){
-        final int SMALL_BUTTON_WIDTH = 40;
-        final int SMALL_BUTTON_HEIGHT = 40;
 
-        final float BIG_FONT_SIZE = 25f;
         final float MEDIUM_FONT_SIZE = 13f;
         final float SMALL_FONT_SIZE = 10f;
 
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLayout(new MigLayout());
-        setMinimumSize(new Dimension(280, 500));
+        ObjectDecorator.decorateJDialog(this);
+
+        setMinimumSize(new Dimension(290, 500));
 
         JLabel aboutLabel = new JLabel("Over het document:");
-        aboutLabel.setFont(Main.font.deriveFont(12f));
-        aboutLabel.setForeground(ColorScheme.detailColor);
+        ObjectDecorator.decorateNormalLabel(aboutLabel);
         add(aboutLabel,"wrap");
 
         JTextArea aboutText = new JTextArea();
@@ -35,11 +31,10 @@ public class About extends JDialog {
         aboutText.setMinimumSize(new Dimension(250,125));
         aboutText.setWrapStyleWord(true);
         aboutText.setLineWrap(true);
-        add(aboutText, "wrap, span 2");
+        add(aboutText, "wrap, span 2, align 50% 50%");
 
         JLabel byLabel = new JLabel("Door:");
-        byLabel.setFont(Main.font.deriveFont(12f));
-        byLabel.setForeground(ColorScheme.detailColor);
+        ObjectDecorator.decorateNormalLabel(byLabel);
         add(byLabel, "wrap");
 
         JTextArea byText = new JTextArea();
@@ -49,7 +44,7 @@ public class About extends JDialog {
         byText.setMinimumSize(new Dimension(250,50));
         byText.setWrapStyleWord(true);
         byText.setLineWrap(true);
-        add(byText, "wrap, span 2");
+        add(byText, "wrap, span 2, align 50% 50%");
 
         Object[][] data = new Object[Main.con.getActors(nameIndex).size()][2];
         int actorCounter = 0;
@@ -76,11 +71,8 @@ public class About extends JDialog {
         buttons.setMaximumSize(new Dimension(110, 60));
         buttons.setLayout(new MigLayout("align 100%"));
 
-        JButton addActor = new JButton();
-        addActor.setMinimumSize(new Dimension(SMALL_BUTTON_WIDTH,SMALL_BUTTON_HEIGHT));
-        addActor.setMaximumSize(new Dimension(SMALL_BUTTON_WIDTH,SMALL_BUTTON_HEIGHT));
-        addActor.setText("+");
-        addActor.setFont(Main.font.deriveFont(BIG_FONT_SIZE));
+        JButton addActor = new JButton("+");
+        ObjectDecorator.decorateSmallButton(addActor);
         addActor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -98,13 +90,10 @@ public class About extends JDialog {
 
             }
         });
-        buttons.add(addActor);
+        buttons.add(addActor, "align 50% 50%");
 
-        JButton removeActor = new JButton();
-        removeActor.setMinimumSize(new Dimension(SMALL_BUTTON_WIDTH,SMALL_BUTTON_HEIGHT));
-        removeActor.setMaximumSize(new Dimension(SMALL_BUTTON_WIDTH,SMALL_BUTTON_HEIGHT));
-        removeActor.setText("-");
-        removeActor.setFont(Main.font.deriveFont(BIG_FONT_SIZE));
+        JButton removeActor = new JButton("-");
+        ObjectDecorator.decorateSmallButton(removeActor);
         removeActor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -119,22 +108,21 @@ public class About extends JDialog {
 
         add(buttons, "wrap, span 2, align 100%");
 
+        JPanel saveAndExitPanel = new JPanel();
+        saveAndExitPanel.setLayout(new MigLayout());
+
         JButton exit = new JButton("Exit");
-        exit.setFont(Main.font.deriveFont(10f));
-        exit.setForeground(ColorScheme.detailColor);
-        exit.setMinimumSize(new Dimension(121,40));
+        ObjectDecorator.decorateMediumButton(exit);
         exit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
             }
         });
-        add(exit);
+        saveAndExitPanel.add(exit, "align 100%, span 1");
 
         JButton save = new JButton("Save");
-        save.setFont(Main.font.deriveFont(10f));
-        save.setForeground(ColorScheme.detailColor);
-        save.setMinimumSize(new Dimension(121,40));
+        ObjectDecorator.decorateMediumButton(save);
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -158,7 +146,9 @@ public class About extends JDialog {
                 Main.con.updateActors(nameIndex, actors, isPrimary);
             }
         });
-        add(save, "wrap");
+
+        saveAndExitPanel.add(save, "wrap, span 1");
+        add(saveAndExitPanel, "span 2, align 50% 50%");
 
         setVisible(true);
     }

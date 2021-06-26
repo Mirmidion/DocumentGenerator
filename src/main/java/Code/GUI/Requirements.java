@@ -87,10 +87,8 @@ public class Requirements extends JDialog {
             buttons.setLayout(new MigLayout("align 100%"));
 
             JButton addCriteria = new JButton();
-            addCriteria.setMinimumSize(new Dimension(SMALL_BUTTON_WIDTH,SMALL_BUTTON_HEIGHT));
-            addCriteria.setMaximumSize(new Dimension(SMALL_BUTTON_WIDTH,SMALL_BUTTON_HEIGHT));
+            ObjectDecorator.decorateSmallButton(addCriteria);
             addCriteria.setText("+");
-            addCriteria.setFont(Main.font.deriveFont(BIG_FONT_SIZE));
             int finalTableCounter2 = tableCounter;
             addCriteria.addActionListener(new ActionListener() {
                 @Override
@@ -110,11 +108,8 @@ public class Requirements extends JDialog {
             });
             buttons.add(addCriteria);
 
-            JButton removeCriteria = new JButton();
-            removeCriteria.setMinimumSize(new Dimension(SMALL_BUTTON_WIDTH,SMALL_BUTTON_HEIGHT));
-            removeCriteria.setMaximumSize(new Dimension(SMALL_BUTTON_WIDTH,SMALL_BUTTON_HEIGHT));
-            removeCriteria.setText("-");
-            removeCriteria.setFont(Main.font.deriveFont(BIG_FONT_SIZE));
+            JButton removeCriteria = new JButton("-");
+            ObjectDecorator.decorateSmallButton(removeCriteria);
             int finalTableCounter1 = tableCounter;
             removeCriteria.addActionListener(new ActionListener() {
                 @Override
@@ -131,8 +126,7 @@ public class Requirements extends JDialog {
             properties.add(buttons, "wrap, span 1, align 100%");
 
             JButton save = new JButton("Save");
-            save.setFont(Main.font.deriveFont(MEDIUM_FONT_SIZE));
-            save.setMinimumSize(new Dimension(BUTTON_WIDTH,BUTTON_HEIGHT));
+            ObjectDecorator.decorateMediumButton(save);
             int finalTableCounter = tableCounter;
             save.addActionListener(new ActionListener() {
                 @Override

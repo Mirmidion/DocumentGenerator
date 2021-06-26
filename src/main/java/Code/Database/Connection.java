@@ -831,6 +831,7 @@ public class Connection {
                 update("UPDATE beschrijvingscenario SET orderID = " + rs.getInt(1) + " WHERE scenarioID = " + rs.getInt(1));
                 update("UPDATE beschrijvingscenario SET row = 'Edit This" + rs.getInt(1) + "' WHERE scenarioID = " + rs.getInt(1));
             }
+            rs.close();
         }
         catch (Exception e){
             e.printStackTrace();
@@ -888,6 +889,7 @@ public class Connection {
                 update("UPDATE beschrijvingscenario SET row = '" + rows.get(counter) + "' WHERE scenarioID = " + rowIDs.getInt(1));
                 counter++;
             }
+            rowIDs.close();
         }
         catch(Exception e){
             e.printStackTrace();
@@ -904,6 +906,7 @@ public class Connection {
                 beschrijving[1] = rs.getString(2);
                 beschrijving[2] = rs.getString(3);
             }
+            rs.close();
         }
         catch (Exception e){
             e.printStackTrace();
@@ -930,6 +933,7 @@ public class Connection {
                 addBeschrijving(usecaseName, beschrijving);
             }
             update("UPDATE usecasebeschrijving SET precondition = '" + beschrijving[0] + "', postcondition = '" + beschrijving[1] + "', uitzondering = '" + beschrijving[2] + "' WHERE usecaseID = " + usecaseID);
+            rs.close();
         }
         catch (Exception e){
             addBeschrijving(usecaseName, beschrijving);
@@ -940,10 +944,11 @@ public class Connection {
         int documentID = Connection.projectDocumentIDs.get(nameIndex);
         ArrayList<String> names = new ArrayList<>();
         try{
-            ResultSet rs = select("SELECT title FROM wireframes WHERE documentID = " + documentID);
+            ResultSet rs = select("SELECT title FROM wireframes WHERE documentID = " + documentID + " ORDER BY fileID");
             while(rs.next()){
                 names.add(rs.getString(1));
             }
+            rs.close();
         }
         catch(Exception e){
          e.printStackTrace();
@@ -951,26 +956,101 @@ public class Connection {
         return names;
     }
 
+    public ArrayList<String> getWireframesByDocumentID(int documentID){
+        ArrayList<String> names = new ArrayList<>();
+        try{
+            ResultSet rs = select("SELECT title FROM wireframes WHERE documentID = " + documentID + " ORDER BY fileID");
+            while(rs.next()){
+                names.add(rs.getString(1));
+            }
+            rs.close();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return names;
+    }
+
+    public String getWireframeFilePath(int nameIndex, int wireframeNumber){
+        int documentID = Connection.projectDocumentIDs.get(nameIndex);
+        String path = "";
+        try{
+            ResultSet rs = select("SELECT fileID FROM wireframes WHERE documentID = " + documentID + " ORDER BY fileID");
+            int counter = 1;
+            int wireframeID = 1;
+            while(rs.next()){
+                if (counter == wireframeNumber){
+                    wireframeID = rs.getInt(1);
+                    break;
+                }
+            }
+            rs = select("SELECT filepath FROM wireframes WHERE fileID = " + wireframeID);
+            if(rs.next()) {
+                path =  rs.getString(1);
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return path;
+    }
+
+    public String getWireframeFilePathByDocumentID(int documentID, int wireframeNumber){
+        String path = "";
+        try{
+            ResultSet rs = select("SELECT fileID FROM wireframes WHERE documentID = " + documentID + " ORDER BY fileID");
+            int counter = 1;
+            int wireframeID = 1;
+            while(rs.next()){
+                if (counter == wireframeNumber){
+                    wireframeID = rs.getInt(1);
+                    break;
+                }
+            }
+            rs = select("SELECT filepath FROM wireframes WHERE fileID = " + wireframeID);
+            if(rs.next()) {
+                path =  rs.getString(1);
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return path;
+    }
+
     public void addWireframe(int nameIndex, String title){
         int documentID = Connection.projectDocumentIDs.get(nameIndex);
         try{
-            update("INSERT INTO wireframes (documentID,title) VALUES(" + documentID + "," + title + ")");
+            update("INSERT INTO wireframes (documentID,title) VALUES(" + documentID + ",'" + title + "')");
         }
         catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public void updateWireframeFilePath(int nameIndex, String filePath){
+    public void updateWireframeFilePath(int nameIndex, String filePath, int wireframeNumber){
         int documentID = Connection.projectDocumentIDs.get(nameIndex);
         try{
+            ResultSet rs = select("SELECT fileID FROM wireframes WHERE documentID = " + documentID + " ORDER BY fileID");
+            int counter = 1;
+            int wireframeID = 1;
+            while(rs.next()){
+                if (counter == wireframeNumber){
+                    wireframeID = rs.getInt(1);
+                    break;
+                }
+            }
+
             PreparedStatement statement;
             java.sql.Connection connection = DriverManager.getConnection(url, username, password);
-            String query = "UPDATE wireframes SET filePath = ?";
+            String query = "UPDATE wireframes SET filePath = ? WHERE documentID = " + documentID + " AND fileID = " + wireframeID;
             statement = connection.prepareStatement(query);
             statement.setString(1, filePath);
             statement.executeUpdate();
             statement.close();
+            rs.close();
             connection.close();
         }
         catch (Exception e){
@@ -978,16 +1058,27 @@ public class Connection {
         }
     }
 
-    public void updateWireframeName(int nameIndex, String name){
+    public void updateWireframeName(int nameIndex, String name, int wireframeNumber){
         int documentID = Connection.projectDocumentIDs.get(nameIndex);
         try{
-            ResultSet rs = select("SELECT title FROM wireframes WHERE documentID = " + documentID);
+            ResultSet rs = select("SELECT wireframeID FROM wireframes WHERE documentID = " + documentID + " ORDER BY fileID");
+            int counter = 1;
+            int wireframeID = 1;
+            while(rs.next()){
+                if (counter == wireframeNumber){
+                    wireframeID = rs.getInt(1);
+                    break;
+                }
+            }
+
+            rs = select("SELECT title FROM wireframes WHERE documentID = " + documentID+ " AND WHERE fileID = " + wireframeID);
             while(rs.next()){
                 if (rs.getString(1).equals(name)){
                     return;
                 }
             }
             update("UPDATE wireframes SET title = '" + name + "'");
+            rs.close();
         }
         catch(Exception e){
             e.printStackTrace();

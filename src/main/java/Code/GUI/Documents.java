@@ -122,11 +122,7 @@ public class Documents extends JPanel {
                     allButtons.add(designKeuzes);
 
                     for(JButton button : allButtons){
-                        button.setBackground(ColorScheme.secondaryColor);
-                        button.setForeground(ColorScheme.detailColor);
-                        button.setMinimumSize(new Dimension(300,80));
-                        //button.setBorder(new LineBorder(ColorScheme.secondaryColor, 3));
-                        button.setFont(Main.font.deriveFont(20f));
+                        ObjectDecorator.decorateBigButton(button);
                         buttonPanel.add(button);
                     }
 
@@ -254,7 +250,7 @@ public class Documents extends JPanel {
                 }
 
                 dia = new JDialog();
-                dia.setLayout(new MigLayout());
+                ObjectDecorator.decorateJDialog(dia);
                 dia.setMinimumSize(new Dimension(280,140));
                 dia.setLocation(820,470);
                 dia.setTitle("Select your " + source.getText());
@@ -275,9 +271,7 @@ public class Documents extends JPanel {
                         filePath.setText(path);
                     }
                 });
-                open.setBackground(ColorScheme.secondaryColor);
-                open.setFont(Main.font.deriveFont(10f));
-                open.setForeground(ColorScheme.detailColor);
+                ObjectDecorator.decorateMediumButton(open);
                 open.setMinimumSize(new Dimension(121,40));
 
                 JButton save = new JButton("Save");
@@ -298,9 +292,7 @@ public class Documents extends JPanel {
                         }
                     }
                 });
-                save.setBackground(ColorScheme.secondaryColor);
-                save.setFont(Main.font.deriveFont(10f));
-                save.setForeground(ColorScheme.detailColor);
+                ObjectDecorator.decorateMediumButton(save);
                 save.setMinimumSize(new Dimension(121,40));
 
                 dia.add(open);
@@ -319,9 +311,7 @@ public class Documents extends JPanel {
             setLayout(new MigLayout("wrap 2, align 50% 50%"));
 
             JButton useCases = new JButton("Use Cases");
-            useCases.setMinimumSize(new Dimension(121,40));
-            useCases.setFont(Main.font.deriveFont(20f));
-            useCases.setBackground(ColorScheme.secondaryColor);
+            ObjectDecorator.decorateBigButton(useCases);
             useCases.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

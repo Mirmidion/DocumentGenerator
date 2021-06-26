@@ -93,6 +93,8 @@ public class GenerateNew {
         createPreface(document, documentID);
         createActivityDiagram(document);
         createRequirements(document);
+        createDomainModel(document);
+        createWireframes(document, documentID);
 
         //Write the Document in file system
         FileOutputStream out = new FileOutputStream(filePath + projectName + "." + documentName + ".docx");
@@ -306,6 +308,14 @@ public class GenerateNew {
         run.setText(text);
     }
 
+    public void addBoldText(XWPFDocument document, String text){
+        XWPFParagraph para = document.createParagraph();
+        para.setStyle("Geenafstand");
+        XWPFRun run = para.createRun();
+        run.setBold(true);
+        run.setText(text);
+    }
+
     public void createPreface(XWPFDocument document, int documentID){
 
         createChapter(document, "Inleiding");
@@ -335,11 +345,53 @@ public class GenerateNew {
 
             FileInputStream is = new FileInputStream(filePath);
             if (filePath.endsWith("png")) {
-                document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_PNG, "Activity Diagram", Units.toEMU(width), Units.toEMU(height));
+                document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_PNG, "", Units.toEMU(width), Units.toEMU(height));
             }
             else if (filePath.endsWith("jpeg")) {
-                document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_JPEG, "Activity Diagram", Units.toEMU(width), Units.toEMU(height));
+                document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_JPEG, "", Units.toEMU(width), Units.toEMU(height));
             }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void addWireframePicture(XWPFDocument document, int documentID, int wireframeNumber){
+        String filePath = Main.con.getWireframeFilePathByDocumentID(documentID, wireframeNumber);
+        try {
+
+            FileInputStream fis = new FileInputStream(filePath);
+            BufferedImage bimg = ImageIO.read(fis);
+            int width          = bimg.getWidth();
+            int height         = bimg.getHeight();
+            System.out.println(width);
+
+            FileInputStream is = new FileInputStream(filePath);
+            if (filePath.endsWith("png")) {
+                document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_PNG, "", Units.toEMU(width), Units.toEMU(height));
+            }
+            else if (filePath.endsWith("jpeg")) {
+                document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_JPEG, "", Units.toEMU(width), Units.toEMU(height));
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void addPNGPicture(XWPFDocument document, FileInputStream filePath){
+
+        try {
+
+            FileInputStream fis = filePath;
+            BufferedImage bimg = ImageIO.read(fis);
+            int width          = bimg.getWidth();
+            int height         = bimg.getHeight();
+            System.out.println(width);
+
+            FileInputStream is = filePath;
+            document.createParagraph().createRun().addPicture(is, Document.PICTURE_TYPE_PNG, "", Units.toEMU(width), Units.toEMU(height));
+
         }
         catch(Exception e){
             e.printStackTrace();
@@ -409,5 +461,40 @@ public class GenerateNew {
             }
         }
 
+    }
+
+    public void createDomainModelExplanation(XWPFDocument document){
+        addText(document, "Een domeinmodel is een model wat objecten, eigenschappen en de onderlinge relaties tussen elkaar weergeeft binnen de applicaties. Het bestaat uit klassen, attributen, associaties en overervingen. ");
+        createSpacing(1,document);
+        createSubChapter(document, "Legenda");
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream("src/main/java/Templates/img.png");
+            addPNGPicture(document, fis);
+        }
+        catch (Exception e){
+
+        }
+
+
+    }
+
+    public void createDomainModel(XWPFDocument document){
+
+        createChapter(document, "Domeinmodel");
+        createDomainModelExplanation(document);
+        createSubChapter(document, "Model");
+        addPicture(document, "domeinModel");
+
+    }
+
+    public void createWireframes(XWPFDocument document, int documentID){
+        createChapter(document, "Wireframes");
+        int counter = 1;
+        for (String name : Main.con.getWireframesByDocumentID(documentID)){
+            createSubChapter(document, name);
+            addWireframePicture(document, documentID, counter);
+            counter++;
+        }
     }
 }
